@@ -1,0 +1,16 @@
+#!/bin/sh
+
+print_date() {
+	date '+%d%M %H:%m'
+}
+
+print_mem() {
+	mem_full=$(($(sysctl -n hw.physmem) / 1024 / 1024))
+	while read -r _ _ line _; do
+		mem_used=${line%%M}
+	done <<-EOF
+		$(vmstat)
+			EOF
+	echo "${mem_used:-?}M / ${mem_full:-}M"
+}
+print_mem

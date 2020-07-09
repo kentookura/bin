@@ -1,0 +1,6 @@
+#!/bin/sh
+
+nextrv=$(jq '.data.next_reviews_at' $HOME/.cache/wanikani.json | sed -e  's/^.*T//' -e 's/:00\.0*Z"//')
+
+
+#curl "https://api.wanikani.com/v2/summary" -H "Authorization: Bearer 4624bebb-39b8-4ed6-8f42-5f7cfb3487b3" > $HOME/.cache/wanikani.json
