@@ -1,0 +1,50 @@
+#!/bin/sh
+
+local src_dir dst_dir name url
+
+usage() {
+>&2 cat << EOF
+${0##*/} -s src_dir -d  dst_dir -n name -u url
+EOF
+exit 1
+}
+
+if [ -z "$*" ] && ([ ! -d dst ] || [ ! -d src ]) ; then
+	echo No arguments given, no folder named src or dst in current directory.
+	echo checking fallback falues:
+
+	(: "${SITE_SRC_DIR:?}") && src_dir=${SITE_SRC_DIR}
+	(: "${SITE_DST_DIR?}")  && dst_dir=${SITE_DST_DIR}
+	(: "${SITE_NAME?}")     && name=${SITE_NAME}
+	(: "${SITE_URL?}")      && url=${SITE_URL}
+
+elif [ -d dst ] && [ -d src ] ; then
+	echo found dst and src.
+	src_dir=src
+	dst_dir=dst
+	echo -n enter site name: 
+	read -r site_name
+	echo -n enter site url: 
+	read -r site_url
+else
+	args='getopt sdnu: $*'
+	if [ $? -ne 0 ] ; then
+		usage
+	fi
+	set -- $args
+	while [ $# -ne 0 ]
+	do
+		case "$1" in
+			-s) src_dir="$2"; shift 2 ;;
+			-d) dst_dir="$2"; shift 2 ;;
+			-n) name="$2"; 	  shift 2 ;;
+			-n) url="$2"; 	  shift 2 ;;
+		esac
+	done
+fi
+
+#rm -f $SITE_DST_DIR/.files && ssg5 $SITE_SRC_DIR $SITE_DST_DIR $SITE_NAME $SITE_URL
+echo looking for .md files in ${src_dir} 
+echo placing .html files in ${dst_dir}
+echo site name will be ${site_name}
+echo site URL will be ${site_url}
