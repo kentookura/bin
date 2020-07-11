@@ -1,17 +1,37 @@
 #!/bin/sh
+#
+# edit a local website and reload surf when a file changes
+#
+# kento@okura.at
+
 
 local src_dir dst_dir name url
 
 usage() {
 >&2 cat << EOF
-${0##*/} -s src_dir -d  dst_dir -n name -u url
+Usage: ${0##*/} -s src_dir -d  dst_dir -n name -u url
+If no arguments are given, it will first check if the
+variables SITE_SRC_DIR, SITE_DST_DIR, SITE_NAME, and SITE_URL
+are set. Then it checks for the directories src and dst
+and will prompt you for the name and URL of the site.
+
 EOF
 exit 1
 }
 
-if [ -z "$*" ] && ([ ! -d dst ] || [ ! -d src ]) ; then
+deploy() {
+	printf "deploy website now? [y/n] "
+	read -r will_deploy
+	case $will_deploy in
+		[Yy]) rsync -avP --delete dst/ root@okura.at:var/www/main && break
+			;;
+		*) break ;;
+	esac
+}
+
+if [ -z "$*" ] ; then
 	echo No arguments given, no folder named src or dst in current directory.
-	echo checking fallback falues:
+	echo using fallback falues:
 
 	(: "${SITE_SRC_DIR:?}") && src_dir=${SITE_SRC_DIR}
 	(: "${SITE_DST_DIR?}")  && dst_dir=${SITE_DST_DIR}
@@ -22,10 +42,16 @@ elif [ -d dst ] && [ -d src ] ; then
 	echo found dst and src.
 	src_dir=src
 	dst_dir=dst
-	echo -n enter site name: 
-	read -r site_name
-	echo -n enter site url: 
-	read -r site_url
+	
+	(: "${SITE_NAME?}")     && 
+		echo Variable SITE_NAME is set to "$SITE_NAME". \\nEnter new value or leave blank to use $SITE_NAME
+	read -r name	
+	[ -z "$name" ] && name=${SITE_NAME:-"My Website"}
+
+	(: "${SITE_URL?}")      && 
+		echo Variable SITE_URL is set to "$SITE_URL". \n Enter new value or leave blank to use $SITE_URL
+	read -r url
+	[ -z "$url" ] && url=${SITE_URL:-"http://"}
 else
 	args='getopt sdnu: $*'
 	if [ $? -ne 0 ] ; then
@@ -39,12 +65,22 @@ else
 			-d) dst_dir="$2"; shift 2 ;;
 			-n) name="$2"; 	  shift 2 ;;
 			-n) url="$2"; 	  shift 2 ;;
+			*) usage
 		esac
 	done
 fi
 
-#rm -f $SITE_DST_DIR/.files && ssg5 $SITE_SRC_DIR $SITE_DST_DIR $SITE_NAME $SITE_URL
-echo looking for .md files in ${src_dir} 
-echo placing .html files in ${dst_dir}
-echo site name will be ${site_name}
-echo site URL will be ${site_url}
+cat <<EOF
+looking for .md files in ${src_dir}
+placing .html files in ${dst_dir}
+site name will be "${name}"
+site URL will be "${url}"
+EOF
+
+rm -f $dst_dir/.files && ssg5 "$src_dir" "$dst_dir" "$name" "$url"
+surf $dst_dir/index.html &2>/dev/null &
+
+trap deploy EXIT
+
+find $src_dir | 
+	entr -s "rm -f $src_dir/.files && ssg5 $src_dir $dst_dir $name $url && kill -HUP $(pgrep surf)"
