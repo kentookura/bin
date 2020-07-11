@@ -1,0 +1,58 @@
+#!/bin/sh
+
+usage() {
+>&2 cat << EOF
+Usage: ${0##*/} -s src_dir -d  dst_dir -n name -u url
+If no arguments are given, it will first check if the
+variables SITE_SRC_DIR, SITE_DST_DIR, SITE_NAME, and SITE_URL
+are set. Then it checks for the directories src and dst
+and will prompt you for the name and URL of the site.
+
+EOF
+exit 1
+}
+
+sourcedfunc() {
+	echo function was sourced
+}
+
+
+deploy() {
+	printf "deploy website now? [y/n] "
+	read -r will_deploy
+	case $will_deploy in
+		[Yy]) rsync -avP --delete dst/ root@okura.at:var/www/main && break
+			;;
+		*) break ;;
+	esac
+}
+
+openfiles() {
+	stid="$(tabbed -d -d -s -r 2 st -w x)"
+	surfid="$(tabbed -d -d -s -r 2 surf -w x)"
+
+	#for var in "$@"
+	#do
+	#	st -w "$stid" -T ${var##*/} -e vim "$var" &
+	#	surf -e $surfid $(echo $var | sed 's/') &
+	#done
+	for mdfile in $(find $SITE_SRC_DIR | grep md$)
+	do
+		st -w "$stid" -T ${mdfile##*/} -e vim "$mdfile" &
+	done
+	for htmlfile in $(find $SITE_DST_DIR | grep html$)
+	do
+		surf -m -S -e $surfid $htmlfile &
+	done
+}
+
+refreshurf() {
+	for id in $(pgrep surf)
+	do
+		kill -HUP $id
+	done
+}
+
+generate() {
+	rm -f $1/.files && ssg5 $1 $2 $3 $4
+}

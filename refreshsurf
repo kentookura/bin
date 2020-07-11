@@ -1,0 +1,7 @@
+#!/bin/sh
+
+for id in $(pgrep surf) ;
+do
+	kill -HUP $id
+done
+
