@@ -11,42 +11,11 @@ if [ -z "$*" ] ; then
 	echo No arguments given, no folder named src or dst in current directory.
 	echo using fallback falues:
 
-	(: "${SITE_SRC_DIR:?}") && src_dir=${SITE_SRC_DIR}
-	(: "${SITE_DST_DIR?}")  && dst_dir=${SITE_DST_DIR}
-	(: "${SITE_NAME?}")     && name=${SITE_NAME}
-	(: "${SITE_URL?}")      && url=${SITE_URL}
+	: "${src_dir:=${SITE_SRC_DIR:=src}}"
+	: "${dst_dir:=${SITE_DST_DIR:=dst}}"
+	: "${name:=${SITE_NAME:="Kentos Blog"}}"
+	: "${url:=${SITE_URL:="okura.at"}}"   
 
-elif [ -d dst ] && [ -d src ] ; then
-	echo found dst and src.
-	src_dir=src
-	dst_dir=dst
-	
-	(: "${SITE_NAME?}")     && 
-		echo Variable SITE_NAME is set to "$SITE_NAME". \\nEnter new value or leave blank to use $SITE_NAME
-	read -r name	
-	[ -z "$name" ] && name=${SITE_NAME:-"My Website"}
-
-	(: "${SITE_URL?}")      && 
-		echo Variable SITE_URL is set to "$SITE_URL". \n Enter new value or leave blank to use $SITE_URL
-	read -r url
-	[ -z "$url" ] && url=${SITE_URL:-"http://"}
-else
-	args='getopt sdnu: $*'
-	if [ $? -ne 0 ] ; then
-		usage
-	fi
-	set -- $args
-	while [ $# -ne 0 ]
-	do
-		case "$1" in
-			-s) src_dir="$2"; shift 2 ;;
-			-d) dst_dir="$2"; shift 2 ;;
-			-n) name="$2"; 	  shift 2 ;;
-			-n) url="$2"; 	  shift 2 ;;
-			*) usage
-		esac
-	done
-fi
 
 cat <<EOF
 looking for .md files in ${src_dir}
@@ -54,10 +23,6 @@ placing .html files in ${dst_dir}
 site name will be "${name}"
 site URL will be "${url}"
 EOF
-
-#rm -f $dst_dir/.files && ssg5 "$src_dir" "$dst_dir" "$name" "$url"
-#surf $dst_dir/index.html &2>/dev/null &
-# for now only opens fallback values
 
 openfiles
 
