@@ -1,6 +1,23 @@
 #!/bin/sh
 
-nextrv=$(jq '.data.next_reviews_at' $HOME/.cache/wanikani.json | sed -e  's/^.*T//' -e 's/:00\.0*Z"//')
+nextrv="$(jq '.data.next_reviews_at' $HOME/.cache/wanikani.json | sed -e  's/^.*T//' -e 's/:00\.0*Z"//')"
+lastmod="$(stat -f '%Sm' -t '%H:%M')"
+apikey=4624bebb-39b8-4ed6-8f42-5f7cfb3487b3
 
-
-#curl "https://api.wanikani.com/v2/summary" -H "Authorization: Bearer 4624bebb-39b8-4ed6-8f42-5f7cfb3487b3" > $HOME/.cache/wanikani.json
+if datetest $nextrv --lt $lastmod; then
+	curl "https://api.wanikani.com/v2/summary" -H "Authorization: Bearer $apikey > $HOME/.cache/wanikani.json"
+fi
+echo $nextrv
+echo $lastmod
+datetest $nextrv --cmp $(date +'%H:%M')
+case $? in
+	0)
+		notify-send "reviews are ready"
+		;;
+	1)
+		echo $nextrv
+		;;
+	2)
+		echo reviews are ready
+		;;
+esac
