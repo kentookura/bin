@@ -1,0 +1,9 @@
+#!/bin/sh
+
+printf "deploy website now? [y/n] "
+read -r will_deploy
+case $will_deploy in
+	[Yy]) rsync -avP --delete dst/ root@okura.at:var/www/main && break
+		;;
+	*) break ;;
+esac
