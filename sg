@@ -13,9 +13,8 @@ testdir(){
 
 init(){
 	echo "Project root directory: "
-	read PRJ_ROOT
-	testdir $PRJ_ROOT
-	cd $PRJ_ROOT
+	echo $PWD
+	PRJ_ROOT=$PWD
 
 	echo "Site source directory: "
 	read SRC_DIR
@@ -46,7 +45,6 @@ setup(){
 }
 
 openfile(){
-
 	uri="$(echo $1 | sed 's/src/dst/g; s/md/html/g')"
 
 	termxid=$(cat "$term_xidfile")
