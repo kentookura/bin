@@ -1,0 +1,7 @@
+#!/bin/sh
+
+GREEN=`echo -e '33[92m'`
+RED=`echo -e '33[91m'`
+RESET=`echo -e '33[0m'`
+
+/usr/local/bin/ghci "${@}" | sed "s/^Failed, modules loaded:/${RED}&${RESET}/g;s/^OK, modules loaded:/${GREEN}&${RESET}/g"

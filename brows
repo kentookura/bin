@@ -3,9 +3,9 @@ searchterm=$(echo "$browser" |
 	dmenu -nb "#1d2021" -sb "#458588" -nf "#fbf1c7" -sf "#1d2021" \
 	-bw 2 -w 500 -x 600 -y 200 -l 1 -t -p "https://duckduckgo.com/?q=" |
 	sed 's/ /+/g')
+
 url=$( echo $searchterm | 
 	sed '1i\
 	https://duckduckgo.com/?q=' )
 
 $1 $url
-
