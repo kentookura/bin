@@ -1,0 +1,25 @@
+#!/bin/bash
+
+postdir=~/site/src/posts
+template="$(cat <<EOF
+---
+title: <++>
+---
+<++>
+EOF
+)"
+
+main() {
+	post="$(ls ~/site/src/posts | sed '$ a\new' | dmenu)"
+
+	if [ "$post" == "new" ]; then
+		title="$(echo "" | dmenu -t -p 'title for new post: ')"
+		date="$(date +'%Y-%m-%d-')"
+		newpost="$postdir/$date$title.md"
+    echo $template >> $newpost
+    vim $newpost
+	else
+		vim "$postdir/$post"
+	fi
+}
+main
