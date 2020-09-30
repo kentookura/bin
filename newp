@@ -6,6 +6,7 @@ template="$(cat <<EOF
 title: <++>
 ---
 <++>
+/images/<++>.jpg
 EOF
 )"
 
@@ -16,7 +17,7 @@ main() {
 		title="$(echo "" | dmenu -t -p 'title for new post: ')"
 		date="$(date +'%Y-%m-%d-')"
 		newpost="$postdir/$date$title.md"
-    echo $template >> $newpost
+    echo "$template" >> $newpost
     vim $newpost
 	else
 		vim "$postdir/$post"
