@@ -17,7 +17,4 @@ case $? in
 	2)
 		printf 'reviews are ready'
 		;;
-	*)
-		printf 'asdf'
-		;;
 esac
