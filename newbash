@@ -1,0 +1,17 @@
+#!/bin/bash
+
+main() {
+	bindir=~/bin
+
+	name="$(ls $bindir | dmenu -t -p 'edit script: ')"
+	[[ -z $name ]] && exit 1
+
+	es "$name" && exit
+	trg="$bindir/$name"
+
+	echo '#!/bin/bash' > "$trg"
+	chmod +x "$trg"
+	source ~/.bashrc
+	vim "$trg"
+}
+main
