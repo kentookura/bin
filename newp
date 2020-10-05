@@ -1,6 +1,7 @@
 #!/bin/bash
 
 postdir=~/site/src/posts
+oridir=~/site/src/origami
 template="$(cat <<EOF
 ---
 title: <++>
@@ -10,14 +11,32 @@ title: <++>
 EOF
 )"
 
+oritemplate="$(cat <<EOF
+---
+name: <++>
+title: <++>
+designer: <++>
+paper: <++>
+thumb: <++>
+---
+![](<++>/1.jpg)
+EOF
+)"
+
 main() {
-	post="$(ls ~/site/src/posts | sed '$ a\new' | dmenu)"
+	post="$(ls ~/site/src/posts | sed '$ a\new' | dmenu -l 20)"
+  #type="$(printf 'blog\norigami' | dmenu -l 20 -p Which type of post to make?)"
 
 	if [ "$post" == "new" ]; then
 		title="$(echo "" | dmenu -t -p 'title for new post: ')"
-		date="$(date +'%Y-%m-%d-')"
-		newpost="$postdir/$date$title.md"
-    echo "$template" >> $newpost
+    if [ $type ==  "blog"]; then
+      date="$(date +'%Y-%m-%d-')"
+      newpost="$postdir/$date$title.md"
+      echo "$template" >> $newpost
+    elif [ $type == "origami" ]; then
+      newpost="$oridir/$title.md"
+      echo $oritemplate >> $newpost
+    fi
     vim $newpost
 	else
 		vim "$postdir/$post"
